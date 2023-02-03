@@ -1,0 +1,82 @@
+---
+title: "[Ravish Manglani] Data Visualization Intersession23 Final Exam"
+output:
+  flexdashboard::flex_dashboard:
+  orientation: columns
+  vertical_layout: fill
+runtime: shiny
+---
+
+
+
+```{r}
+library(flexdashboard)
+library(shiny)
+library(tidyverse)
+library(maps)
+#setwd("C:/Users/ravis/OneDrive/Desktop/New folder")
+college = read.csv("college.csv",header = TRUE,sep = ",")
+states = map_data("state")
+college = college %>%
+  filter(state=="OH")
+states<-states%>%filter(region=="ohio")
+```
+
+
+Page 1 {data-orientation=columns}
+===================================== 
+Input{.sidebar}
+----------------------------------------------------------------
+### User Input
+
+```{r}
+radioButtons(inputId="my_control", label="Public or Private" ,choices=c("Public","Private"))
+```
+
+Column
+----------------------------------------------------------------
+
+
+
+```{r}
+renderPlot(
+  ggplot(filter(college, control==input$my_control), aes(x=name, y=undergrads))+
+           geom_bar(stat="identity",width=0.8,color="red",fill="orange")+
+           ggtitle("Colleges & Universities in Ohio",subtitle = "Source: U.S. Department of Education")+
+           theme_classic()+
+           theme(axis.text.x=element_text(angle=45, hjust=1))+ 
+           labs(x="School Name", y="Number of Undergrad Students")
+         )
+```
+
+Page 2 {data-orientation=columns}
+=================
+Input{.sidebar}
+----------------------------------------------------------------
+### User Input
+```{r}
+radioButtons(inputId="my_control1", label="Public or Private" ,choices=c("Public","Private"))
+```
+Column
+----------------------------------------------------------------
+
+```{r}
+renderPlot(
+    ggplot(states,aes(x=long, y=lat)) +
+      geom_polygon(fill="lightyellow", color="black") +
+      theme() +   
+      geom_point(filter(college, control==input$my_control1), mapping=aes(x=lng, y=lat, size=undergrads, color=control))+
+                   geom_text(filter(college, control==input$my_control1), mapping=aes(x=lng, y=lat, label=name),inherit.aes = FALSE,check_overlap = TRUE)+
+                               scale_size_continuous() +
+                               scale_color_discrete()+
+                               theme() +
+                               ggtitle("Colleges & Universities in Ohio",subtitle = "Source: U.S. Department of Education")
+                   )
+
+```
+
+
+
+
+
+
